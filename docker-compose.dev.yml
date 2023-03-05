@@ -17,9 +17,8 @@ services:
 
   # php-fpm
   click-php:
-    # production: track "prod" tag on ghcr.io
-    # image: ghcr.io/wetfish/click:prod
     # for development, build the image
+    image: ghcr.io/wetfish/click:dev
     build: .
     container_name: click-php
     restart: unless-stopped
