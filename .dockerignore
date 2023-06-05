@@ -1,3 +1,4 @@
+.git
 .env
 .env.example
 config/
@@ -6,3 +7,5 @@ Dockerfile
 README.md
 schema.sql
 db/*
+php.env
+mariadb.env

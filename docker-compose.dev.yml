@@ -2,7 +2,10 @@ version: '2.4'
 services:
   # httpd
   click-web:
-    image: docker.io/nginx:1.23-alpine
+    image: ghcr.io/wetfish/click:dev-nginx
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     container_name: click-web
     restart: unless-stopped
     volumes:
@@ -18,8 +21,10 @@ services:
   # php-fpm
   click-php:
     # for development, build the image
-    image: ghcr.io/wetfish/click:dev
-    build: .
+    image: ghcr.io/wetfish/click:dev-php
+    build:
+      context: .
+      dockerfile: Dockerfile.php
     container_name: click-php
     restart: unless-stopped
     # db connection info
@@ -27,6 +32,9 @@ services:
       - ./php.env
     volumes:
       - ./wwwroot:/var/www
+      - ./config/php-fpm.conf:/etc/php/5.6/fpm/php-fpm.conf:ro
+      - ./config/php-fpm-pool.conf:/etc/php/5.6/fpm/pool.d/www.conf:ro
+      - ./config/php.ini:/etc/php/5.6/fpm/php.ini:ro
     tmpfs: /tmp
     networks:
       click-internal: {}
@@ -36,17 +44,15 @@ services:
     image: docker.io/mariadb:10.10
     container_name: click-db
     restart: unless-stopped
+    command: --sql-mode=""
     env_file:
       - ./mariadb.env
-    # built-in healthcheck script
-    healthcheck:
-      test: ["healthcheck.sh", "--su=mysql", "--connect", "--innodb_initialized"]
-      interval: 60s
-      timeout: 5s
-      retries: 5
     volumes:
       - ./schema.sql:/docker-entrypoint-initdb.d/setup.sql
       - ./db/data:/var/lib/mysql
+    # dev env: expose mariadb on 127.0.0.1:3401
+    ports:
+      - "127.0.0.1:3401:3306"
     networks:
       click-internal: {}
 

@@ -22,8 +22,4 @@ docker compose -f docker-compose.dev.yml logs -f
 ```
 
 The service will be available at [http://127.0.0.1:2401](http://127.0.0.1:2401)
-
-## When do I need to rebuild the container?
-
-Only if you touch Dockerfile. \
-Application code is not in the php-fpm container image.
+Mysql db in dev env is reachable at tcp://127.0.0.1:3401
