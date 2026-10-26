@@ -1,0 +1,30 @@
+# local development only, server deploys skip this file
+services:
+  # httpd
+  nginx:
+    # normally behind the shared caddy proxy from wetfish/server
+    ports:
+      - "127.0.0.1:2401:80"
+
+  # database, on a server click uses wetfish/server's shared mariadb instead
+  mariadb:
+    image: docker.io/mariadb:12.3.3
+    restart: unless-stopped
+    env_file:
+      - ./mariadb.env
+    volumes:
+      # creates click's tables the first time mariadb starts with an empty volume
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+      - mariadb:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3401:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+
+volumes:
+  # click's local database, kept when the containers are replaced
+  mariadb: {}

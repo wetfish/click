@@ -1,13 +1,9 @@
 # runtime container
 FROM docker.io/nginx:1.22.1-alpine
 
-USER root
-
-# copy wwwroot into container
-COPY ./wwwroot /var/www
-
-RUN set -exu \
-  && chown -R nginx:nginx /var/www
+# nginx serves the static files, and checks php files exist before passing them on
+COPY ./public_html /var/www
+COPY ./config/nginx.conf /etc/nginx/conf.d/default.conf
 
 # taken from nginx dockerfile here
 # https://github.com/nginxinc/docker-nginx/blob/fef51235521d1cdf8b05d8cb1378a526d2abf421/stable/alpine/Dockerfile

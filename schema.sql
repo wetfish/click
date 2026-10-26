@@ -45,13 +45,13 @@ CREATE TABLE `Pages` (
   `ID` int(10) NOT NULL AUTO_INCREMENT,
   `Page` varchar(255) NOT NULL,
   `Time` int(10) NOT NULL,
-  `IP` varchar(32) NOT NULL,
+  `IP` varchar(45) NOT NULL,
   `Data` longtext NOT NULL,
   `Deleted` tinyint(1) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `Deleted` (`Deleted`),
   KEY `Page` (`Page`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_as_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

@@ -1,71 +1,40 @@
-version: '2.4'
+# deployed with wetfish/server, see README.md
 services:
   # httpd
-  click-web:
-    image: ghcr.io/wetfish/click:prod-nginx
-    container_name: click-web
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     restart: unless-stopped
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    volumes:
-      - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
-    # join click-internal and traefik-backend networks
-    networks:
-      click-internal: {}
-      traefik-backend: {}
+    # nginx needs php running before it starts
+    depends_on:
+      - php
+    healthcheck:
+      # nginx is healthy once it can reach php-fpm, see config/nginx.conf
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/fpm-ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   # php-fpm
-  click-php:
-    # production: track "prod" tag on ghcr.io
-    image: ghcr.io/wetfish/click:prod-php
-    container_name: click-php
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile.php
     restart: unless-stopped
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    # db connection info
+    # db connection info, filled in from setup.conf on a server
     env_file:
       - ./php.env
+    # sessions are kept here, capped at 64 MB so they can't eat the server's memory
     volumes:
-      - ./config/php-fpm.conf:/etc/php/5.6/fpm/php-fpm.conf:ro
-      - ./config/php-fpm-pool.conf:/etc/php/5.6/fpm/pool.d/www.conf:ro
-      - ./config/php.ini:/etc/php/5.6/fpm/php.ini:ro
-    tmpfs: /tmp
-    networks:
-      click-internal: {}
-  
-  # database
-  click-db:
-    image: docker.io/mariadb:10.10
-    container_name: click-db
-    restart: unless-stopped
-    command: --sql-mode=""
-    env_file:
-      - ./mariadb.env
-    volumes:
-      - ./schema.sql:/docker-entrypoint-initdb.d/setup.sql
-      - ./db/data:/var/lib/mysql
-    networks:
-      click-internal: {}
-
-
-  # watchtower - automatically pull new container images
-  # note: this does not update the repo
-  # if deployment files have changed you will need to git pull && docker compose up -d manually
-  click-watchtower:
-    image: ghcr.io/containrrr/watchtower:1.5.3
-    container_name: click-watchtower
-    environment:
-      - "WATCHTOWER_CLEANUP=true"
-      - "WATCHTOWER_POLL_INTERVAL=30"
-      - "WATCHTOWER_LABEL_ENABLE=true"
-      - "NO_COLOR=true"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-
-networks:
-  # ephemeral, created for us by compose
-  click-internal:
-    driver: bridge
-  # persistent, externally created
-  traefik-backend:
-    external: true
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 67108864
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s

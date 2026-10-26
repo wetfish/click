@@ -1,48 +1,30 @@
-#
-# runtime container
-FROM docker.io/debian:bookworm-slim
+FROM docker.io/php:5.6.40-fpm-alpine
 
-# install some packages
+RUN docker-php-ext-install mysql mysqli
+
+# php's production defaults, plus click's own settings
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY ./config/php.ini "$PHP_INI_DIR/conf.d/click.ini"
+COPY ./config/php-fpm-pool.conf /usr/local/etc/php-fpm.d/click.conf
+
+# root owns the code, so php can read it but never change it
+COPY ./public_html /var/www
+
 RUN set -exu \
-  && DEBIAN_FRONTEND=noninteractive apt-get -yq update \
-  && DEBIAN_FRONTEND=noninteractive apt-get -yq install \
-    libjpeg-dev \
-    libpng-dev \
-    libfreetype6-dev \
-    software-properties-common \
-    ca-certificates \
-    lsb-release \
-    apt-transport-https \
-    curl \
-    iputils-ping
+  && addgroup -g 1101 fishy \
+  && adduser \
+      -u 1101 \
+      -G fishy \
+      -H \
+      -s /sbin/nologin \
+      -D \
+      fishy
 
-# setup php5.6 repo
-RUN set -exu \
-  && echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list \
-  && curl -fsSL https://packages.sury.org/php/apt.gpg | apt-key add -
-
-# install php5.6, some extensions, and nodejs
-RUN set -exu \
-  && DEBIAN_FRONTEND=noninteractive apt-get -yq update \
-  && DEBIAN_FRONTEND=noninteractive apt-get -yq install \
-    php5.6 \
-    php5.6-fpm \
-    php5.6-mysqli \
-    php5.6-mysql
-
-# clean apt caches
-RUN set -exu \
-  && DEBIAN_FRONTEND=noninteractive apt-get -yq clean
-
-# copy in sources
-COPY ./wwwroot /var/www
-
-# make sure our user owns the wwwroot
-RUN set -exu \
-  && chown -R www-data:www-data /var/www
-
-WORKDIR /var/www
+USER fishy
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
-CMD ["/usr/sbin/php-fpm5.6", "--nodaemonize", "--force-stderr"]
+
+WORKDIR /var/www
+
+CMD ["php-fpm"]

@@ -1,11 +1,5 @@
+# keep git history, secrets, and local database files out of the images
 .git
-.env
-.env.example
-config/
-docker-compose.yml
-Dockerfile
-README.md
-schema.sql
-db/*
-php.env
-mariadb.env
+**/.env
+**/*.env
+db/
