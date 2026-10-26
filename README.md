@@ -12,15 +12,12 @@ for setting up a server. Then add click to it with
 and it'll redeploy whenever `main` (staging) or `release` (production) is pushed.
 
 Click keeps its posts in its own database on the server's shared MariaDB.
-Adding click creates the database and fills in `php.env` from `setup.conf`, so there's nothing to enter by hand.
+Adding click creates the database with empty tables from `schema.sql`, and fills in `php.env`, as `setup.conf` asks, so there's nothing to enter by hand.
 
-The database starts out empty. Create click's tables once, from the server's clone of wetfish/server:
+## How do I restore an old database?
 
-```bash
-./database.sh import click < projects/click/schema.sql
-```
-
-Or load a dump from another server instead, and convert it to utf8mb4:
+By hand, from the server's clone of wetfish/server, once click has been added.
+Import a dump from the old server, which replaces the empty tables, then convert it to utf8mb4:
 
 ```bash
 ./database.sh import click < click.sql
@@ -29,11 +26,9 @@ Or load a dump from another server instead, and convert it to utf8mb4:
 ```
 
 Older servers stored click's posts as latin1, which can't hold emoji.
-`migrations/utf8mb4.sql` converts them to utf8mb4 without changing a single character, keeping a dump from before just in case.
+`migrations/utf8mb4.sql` converts them to utf8mb4, keeping every character as it was, and the dump in between is a copy from before, just in case.
 If any post isn't valid UTF-8, it stops without changing anything, and the file shows how to find those posts.
 Running it again changes nothing.
-
-Heads up, `schema.sql` drops the `Pages` table first, so only import it into an empty database!
 
 For development, to run just this stack, do
 ```bash
