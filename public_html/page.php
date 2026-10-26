@@ -2,10 +2,10 @@
 
 require('include.php');
 
-$Page = replace_input($_GET['page']);
+$Page = db_escape(replace_input($_GET['page'] ?? ''));
 
-$Query = mysql_query("Select `Data` from `Pages` where `Page`='$Page'");
-list($Data) = mysql_fetch_array($Query);
+$Query = db_query("Select `Data` from `Pages` where `Page`='$Page'");
+list($Data) = mysqli_fetch_array($Query);
 
 if($Data)
 {

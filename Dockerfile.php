@@ -1,6 +1,6 @@
-FROM docker.io/php:5.6.40-fpm-alpine
+FROM docker.io/php:8.5.12-fpm-alpine
 
-RUN docker-php-ext-install mysql mysqli
+RUN docker-php-ext-install mysqli
 
 # php's production defaults, plus click's own settings
 RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

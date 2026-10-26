@@ -45,29 +45,32 @@ list($Data, $Links) = Paginate($Query, 25, $_GET['page'], $_SERVER['QUERY_STRING
 
 function Paginate($Query, $Limit, $Page = 1, $QueryString = '', $Start = 0)
 {
-	$Page--;
+	# the page number comes from the url, and goes into the query as a number
+	$Page = max(1, (int) $Page) - 1;
 	$Start = $Start + ($Page * $Limit);
 	$paginationOffset = $Limit * 3;
+	$Data = array();
+	$Links = '';
 
-	$CountQuery = mysql_query("$Query limit $Start, $paginationOffset");
-	$Rows = mysql_num_rows($CountQuery);
+	$CountQuery = db_query("$Query limit $Start, $paginationOffset");
+	$Rows = mysqli_num_rows($CountQuery);
 	$Pages = ceil($Rows / $Limit);
-	
-	$PageQuery = mysql_query("$Query limit $Start, $Limit");
-	while($Result = mysql_fetch_array($PageQuery))
+
+	$PageQuery = db_query("$Query limit $Start, $Limit");
+	while($Result = mysqli_fetch_array($PageQuery))
 	{
 		$Data[] = $Result;
 	}
-	
+
 	if($Page < 5)
 	{
 		for($Count = 1; $Count <= 10 and $Count <= $Pages; $Count++)
 		{
 			parse_str($QueryString, $URL);
 			unset($URL['page']);
-			
+
 			$URL = http_build_query(array_merge($URL, array('p' => $Count)));
-			
+
 			if($Page + 1 == $Count)
 				$Links .= "<a href='?$URL' class='title'>$Count</a> ";
 			else
@@ -80,16 +83,16 @@ function Paginate($Query, $Limit, $Page = 1, $QueryString = '', $Start = 0)
 		{
 			parse_str($QueryString, $URL);
 			unset($URL['page']);
-			
+
 			$URL = http_build_query(array_merge($URL, array('p' => $Count)));
-			
+
 			if($Page + 1 == $Count)
 				$Links .= "<a href='?$URL' class='title'>$Count</a> ";
 			else
 				$Links .= "<a href='?$URL'>$Count</a> ";
 		}
 	}
-	
+
 	return array($Data, $Links);
 }
 
