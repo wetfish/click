@@ -2,3 +2,4 @@
 php.env
 mariadb.env
 db/data/*
+node_modules

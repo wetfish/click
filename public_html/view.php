@@ -8,19 +8,20 @@ require('include.php');
 <html>
 	<head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'></script>
-		<script src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.6/jquery-ui.min.js'></script>
-		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/base/jquery-ui.css" type="text/css" />
+		<script src='/node_modules/wetfish-basic/dist/basic.js'></script>
+		<script src='/click.js'></script>
 
 		<style>
 			#click-header { font-family: Tahoma,Helvetica,Sans-serif; font-size:10pt; }
 			#click-submit { display:none }
+			#click-submit.editing { display:inline; animation: click-fade-in 0.4s; }
+			@keyframes click-fade-in { from { opacity:0; } to { opacity:1; } }
 		</style>
 
 		<script>
 			function Render()
 			{
-				var HTML = $('#click-content').html();
+				var HTML = $('#click-content').el[0].innerHTML;
 
 				HTML = HTML.replace(/&amp;/g, '&');
 				HTML = HTML.replace(/&lt;/g, '<');
@@ -31,7 +32,7 @@ require('include.php');
 
 			function UnRender()
 			{
-				var HTML = $('#click-content').html();
+				var HTML = $('#click-content').el[0].innerHTML;
 
 				HTML = HTML.replace(/&/g, '&amp;');
 				HTML = HTML.replace(/</g, '&lt;');
@@ -42,25 +43,25 @@ require('include.php');
 
 			function Submit()
 			{
-				$('#click-content').css('background-image', "url(/super.gif)");
+				$('#click-content').style({'background-image': "url(/super.gif)"});
 
-				$.post('edit.php?id=<?php echo $_GET['id']; ?>', {data: $('#click-content').html() }, function()
+				Post('edit.php?id=<?php echo rawurlencode($_GET['id'] ?? ''); ?>', {data: $('#click-content').el[0].innerHTML }, function()
 				{
 					// /me farts
-					$('#click-content').css('background-image', "url()");
+					$('#click-content').style({'background-image': "none"});
 				});
 			}
 
 			$(document).ready(function()
 			{
-				$('#click-edit').click(function(event)
+				$('#click-edit').on('click', function(event)
 				{
 					$('#click-content').attr('contenteditable', 'true');
-					$('#click-submit').fadeIn();
+					$('#click-submit').addClass('editing');
 
 				});
 
-				$('#click-submit').click(function(event)
+				$('#click-submit').on('click', function(event)
 				{
 					Submit();
 				});

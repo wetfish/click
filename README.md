@@ -57,3 +57,5 @@ Heads up, it only deploys committed changes!
 
 Whenever you make an edit in public_html or config. \
 Edits to `schema.sql` only apply to a new, empty database.
+
+The pages use [wetfish-basic](https://github.com/wetfish/basic), which the nginx image installs from `public_html/package.json`, so there's nothing to install locally.

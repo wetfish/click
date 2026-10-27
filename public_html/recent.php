@@ -46,10 +46,6 @@
 			#input { border:1px #fff dashed; outline:0; padding:4px; }
 			#form { padding-top:8px; margin:0; }
 		</style>
-
-		<script src='/jquery-1.4.2.min.js'></script>
-		<script src='/jquery-ui-1.8.4.min.js'></script>
-		<link href='/jquery-ui-1.8.4.css' rel='stylesheet' type='text/css' />
 	</head>
 
 	<body>

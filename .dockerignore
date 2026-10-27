@@ -1,5 +1,6 @@
-# keep git history, secrets, and local database files out of the images
+# keep git history, secrets, local database files, and local installs out of the images
 .git
 **/.env
 **/*.env
 db/
+**/node_modules

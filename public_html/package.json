@@ -1,0 +1,9 @@
+{
+  "name": "click",
+  "version": "0.1.0",
+  "description": "All it takes is a click.",
+  "private": true,
+  "dependencies": {
+    "wetfish-basic": "0.7.11"
+  }
+}
