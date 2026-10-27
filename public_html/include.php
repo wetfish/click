@@ -6,8 +6,8 @@ require("config.php");
 // a failed connection or query throws, and php logs it
 $Database = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE);
 
-// click's text is stored as utf8mb4, see migrations/utf8mb4.sql, but its
-// queries still rely on mariadb's old permissive sql mode
+// click's text is stored as utf8mb4, see schema.sql, but its queries still
+// rely on mariadb's old permissive sql mode
 mysqli_set_charset($Database, 'utf8mb4');
 mysqli_query($Database, "SET SESSION sql_mode = ''");
 

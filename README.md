@@ -16,19 +16,34 @@ Adding click creates the database with empty tables from `schema.sql`, and fills
 
 ## How do I restore an old database?
 
-By hand, from the server's clone of wetfish/server, once click has been added.
-Import a dump from the old server, which replaces the empty tables, then convert it to utf8mb4:
+By hand, once click has been added, so its tables are new and empty.
+
+Older servers kept click's posts in a latin1 table, but the bytes in it are UTF-8, because click always sent UTF-8.
+So export only the posts, with their bytes unchanged, on the old server:
 
 ```bash
-./database.sh import click < click.sql
-./database.sh dump click > click-latin1.sql
-./database.sh import click < projects/click/migrations/utf8mb4.sql
+mariadb-dump --default-character-set=latin1 --skip-set-charset --no-create-info --complete-insert --no-autocommit <database> Pages > click-pages.sql
 ```
 
-Older servers stored click's posts as latin1, which can't hold emoji.
-`migrations/utf8mb4.sql` converts them to utf8mb4, keeping every character as it was, and the dump in between is a copy from before, just in case.
-If any post isn't valid UTF-8, it stops without changing anything, and the file shows how to find those posts.
-Running it again changes nothing.
+Then import them into click's utf8mb4 table, from the server's clone of wetfish/server:
+
+```bash
+{ echo "SET NAMES utf8mb4;"; cat click-pages.sql; } | ./database.sh import click
+```
+
+`SET NAMES utf8mb4` tells MariaDB the bytes are UTF-8, which keeps every character as it was, emoji included.
+A normal dump wouldn't work: it brings back the old latin1 table, and turns each byte of a character into a character of its own, so `é` would become `Ã©`.
+
+The import is one transaction. If a post isn't valid UTF-8, MariaDB stops with "Incorrect string value", and nothing is imported.
+To find those posts, run this on the old server:
+
+```sql
+SELECT `ID`, `Page` FROM `Pages`
+WHERE NOT (CAST(CONVERT(CAST(`Data` AS BINARY) USING utf8mb4) AS BINARY) <=> CAST(`Data` AS BINARY))
+   OR NOT (CAST(CONVERT(CAST(`Page` AS BINARY) USING utf8mb4) AS BINARY) <=> CAST(`Page` AS BINARY));
+```
+
+To import again, empty the table first with `TRUNCATE Pages;` in `./database.sh shell click`.
 
 For development, to run just this stack, do
 ```bash

@@ -1,8 +1,8 @@
 -- click's tables. wetfish/server runs this once, as click's own database user,
 -- when a deploy first creates click's database (see setup.conf). The dev
 -- database in docker-compose.override.yml runs it when it starts with an empty
--- volume. It never runs against existing data, so a change here needs a
--- migration in migrations/ for databases that already exist.
+-- volume. It never runs against existing data, so a change here needs its own
+-- SQL for databases that already exist.
 
 CREATE TABLE `Pages` (
   `ID` int(10) NOT NULL AUTO_INCREMENT,
