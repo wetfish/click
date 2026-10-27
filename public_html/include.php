@@ -24,6 +24,12 @@ function db_escape($Value)
     return mysqli_real_escape_string($Database, (string) $Value);
 }
 
+// the users who can edit and delete posts, once logged in with login.php
+function can_moderate()
+{
+    return in_array($_SESSION['Click']['User'] ?? null, array('click', 'rachel', 'wetfish', 'guthbrandr'));
+}
+
 function replace_input($input)
 {
     $output = stripslashes((string) $input);

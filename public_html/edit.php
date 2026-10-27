@@ -1,6 +1,14 @@
 <?php
 
+session_start();
 require('include.php');
+
+// only moderators can edit posts
+if(!can_moderate())
+{
+	http_response_code(403);
+	exit;
+}
 
 if($_POST)
 {

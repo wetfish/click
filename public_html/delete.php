@@ -3,7 +3,7 @@
 session_start();
 require('include.php');
 
-if(in_array($_SESSION['Click']['User'] ?? null, array('click', 'rachel', 'wetfish', 'guthbrandr')))
+if(can_moderate())
 {
 	$ID = stripslashes($_GET['id'] ?? '');
 	$ID = db_escape(filter_var($ID, FILTER_SANITIZE_SPECIAL_CHARS));

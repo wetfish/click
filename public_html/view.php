@@ -93,7 +93,7 @@ if($Time and (!$Deleted or !empty($_SESSION['Click']['User'])))
 
 	echo "<!-- Start Click Nav --> <div style='float:right' id='click-nav'>";
 
-	if(in_array($_SESSION['Click']['User'] ?? null, array('click', 'rachel', 'wetfish', 'guthbrandr')))
+	if(can_moderate())
 	{
 		echo "	<a href='#Submit' id='click-submit'>Submit</a>
 				&emsp;
